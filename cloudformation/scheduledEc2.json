@@ -1,0 +1,114 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Stop all instances and autoscalinggroups which don't have a \"KeepRunning\" tag.",
+  "Parameters": {
+    "BucketName": {
+      "Default": "YOUR_BUCKET_NAME",
+      "Type": "String",
+      "Description" : "Bucket where lambda zip file is located"
+    },
+    "BucketKey": {
+      "Default": "YOUR/PATH/TO/KEY",
+      "Type": "String",
+      "Description" : "Path to the lambda zip file inside bucket"
+    },
+    "CronExpression": {
+      "Default": "cron(0 19 * * ? *)",
+      "Type": "String",
+      "Description" : "Cron expression to run lambda"
+    }
+  },
+  "Resources": {
+    "stop": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+           "S3Bucket": { "Ref": "BucketName" },
+           "S3Key": { "Ref": "BucketKey" }
+       },
+       "Handler": "src/index.handler",
+       "Role": {"Fn::GetAtt" : ["lambdaScheduledEC2StopRole", "Arn"] },
+       "Runtime": "nodejs4.3",
+       "Timeout": 300
+      },
+      "DependsOn": [
+        "lambdaScheduledEC2StopRole"
+      ]
+    },
+    "lambdaScheduledEC2StopRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" 
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com" 
+              },
+              "Action": "sts:AssumeRole" 
+            }
+          ]
+        }
+      }
+    },
+    "lambdaScheduledEC2StopRolePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "Roles": [{"Ref":"lambdaScheduledEC2StopRole"}],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:DescribeInstanceAttribute",
+                "ec2:DescribeInstanceStatus",
+                "ec2:DescribeInstances",
+                "ec2:DescribeTags",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:UpdateAutoScalingGroup"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "PolicyName": "lambdaScheduledEC2StopRolePolicy"
+      }
+    },
+    "eventScheduledEC2Rule": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "scheduledEC2Stop - cron",
+        "ScheduleExpression": { "Ref": "CronExpression" },
+        "State": "ENABLED",
+        "Targets": [{
+          "Arn": { "Fn::GetAtt": ["stop", "Arn"] },
+          "Id": "scheduledEC2"
+        }]
+      }
+    },
+    "eventScheduledEC2Permission": {
+      "Type": "AWS::Lambda::Permission",
+      "DependsOn": [
+        "stop"
+      ],
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stop",
+            "Arn"
+          ]
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": { "Fn::GetAtt": ["eventScheduledEC2Rule", "Arn"] }
+      }
+    }
+  }
+}
