@@ -1,0 +1,30 @@
+{
+  "name": "scheduled-ec2-stop",
+  "version": "1.0.0",
+  "description": "Stop all instances which don't have a \"KeepRunning\" tag.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RedbirdHQ/scheduled-ec2-stop.git"
+  },
+  "keywords": [
+    "ec2",
+    "stop",
+    "scheduled",
+    "lambda",
+    "aws"
+  ],
+  "author": "Bails Pierre",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RedbirdHQ/scheduled-ec2-stop/issues"
+  },
+  "homepage": "https://github.com/RedbirdHQ/scheduled-ec2-stop#readme",
+  "dependencies": {
+    "aws-sdk": "^2.5.5",
+    "bluebird": "^3.4.6"
+  }
+}
