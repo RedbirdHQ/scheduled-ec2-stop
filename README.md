@@ -6,6 +6,7 @@ Moreover, to an easy deployement, a [CloudFormation](https://aws.amazon.com/clou
 Two options for deployement : an easy way with CloudFormation template, a slower way by creating all ressources by yourself.
 
 ## How to use
+
 After deployement, just add the tag `KeepRunning` to your EC2 Instances or auto scaling groups.
 If tag value is equal to `1`, the EC2 is not shutdown. 
 Else, the script shudown the instance or decrease to 0 auto scaling group "Min Size" or "Desired capacity".
@@ -13,11 +14,13 @@ Else, the script shudown the instance or decrease to 0 auto scaling group "Min S
 ## How to deploy
 
 ### Common to both deployements
+
 1. Clone or download sources from git
 2. Go in `scheduled-ec2-stop` directory and run `npm install`
 3. Make a zip file from `scheduled-ec2-stop` directory
 
 ### The Easy Way
+
 1. **Upload your zip file** on your S3 bucket 
 2. **Open CloudFormation panel** in your AWS console
 3. On the top left, click on **Create Stack**
@@ -33,11 +36,12 @@ CronExpression: Expression to scheduled script, UTC time (eg. cron(0 19 * * ? *)
 7. **Review** and **Create**
 
 ### The Slower Way
- #### Create Policy and Role
+
+#### Create Policy and Role
+
  1. Open IAM service, click on **Policies** and **Create Policy**
  2. Select "Create Your Own Policy"
- 3. Named your Policy and give right on your EC2 instances and auto scaling groups ressources with the following "Policy Document" :
-```
+ 3. Named your Policy and give right on your EC2 instances and auto scaling groups ressources with the following "Policy Document" : ```
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -60,18 +64,17 @@ CronExpression: Expression to scheduled script, UTC time (eg. cron(0 19 * * ? *)
 4. Open **Roles** panel and click on **Create New Role**
 5. Named it, select **AWS Lambda** in the "AWS Service Roles", then, select the policy you just created and **AWSLambdaBasicExecutionRole**
 
- #### Create Lambda
+#### Create Lambda
+
  1. Open Lambda service, click on **Create a Lambda function**
  2. Skip "Select blueprint"
- 3. Configure a **CloudWatch Events - Schedule** trigger, and go to the next step
- ```
+ 3. Configure a **CloudWatch Events - Schedule** trigger, and go to the next step ```
 Rule name: Name of your event rule
 Rule description: Describe your rule
 Schedule expression: Your cron expression, UTC time
 Enable triger: better to make it work
 ```
-4. **Configure Lambda** parameters
-```
+4. **Configure Lambda** parameters ```
 Name: ScheduledStopEc2
 Runtime: Node.js 4.3
 Code entry type:  "Upload a .ZIP file", then upload your zip file
