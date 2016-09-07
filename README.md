@@ -26,12 +26,12 @@ Else, the script shudown the instance or decrease to 0 auto scaling group "Min S
 3. On the top left, click on **Create Stack**
 4. In "Choose a template" section, select **Upload a template to Amazon S3** and import `cloudformation/scheduledEc2.json`
 5. **Fill parameters**
-```
-Stack name: Name of your stack (like ScheduledEC2Stop)
-BucketKey: Path to your Lambda zip file inside bucket
-BucketName: Name of your bucket where you just upload your zip file
-CronExpression: Expression to scheduled script, UTC time (eg. cron(0 19 * * ? *) = all days at 7pm UTC)
-```
+    ```
+    Stack name: Name of your stack (like ScheduledEC2Stop)
+    BucketKey: Path to your Lambda zip file inside bucket
+    BucketName: Name of your bucket where you just upload your zip file
+    CronExpression: Expression to scheduled script, UTC time (eg. cron(0 19 * * ? *) = all days at 7pm UTC)
+    ```
 6. Eventually add tags to your templates
 7. **Review** and **Create**
 
@@ -41,26 +41,27 @@ CronExpression: Expression to scheduled script, UTC time (eg. cron(0 19 * * ? *)
 
  1. Open IAM service, click on **Policies** and **Create Policy**
  2. Select "Create Your Own Policy"
- 3. Named your Policy and give right on your EC2 instances and auto scaling groups ressources with the following "Policy Document" : ```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeInstanceAttribute",
-                "ec2:DescribeInstanceStatus",
-                "ec2:DescribeInstances",
-                "ec2:DescribeTags",
-                "ec2:StopInstances",
-                "autoscaling:DescribeAutoScalingGroups",
-                "autoscaling:UpdateAutoScalingGroup"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
+ 3. Named your Policy and give right on your EC2 instances and auto scaling groups ressources with the following "Policy Document" :
+    ```
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeInstanceAttribute",
+                    "ec2:DescribeInstanceStatus",
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeTags",
+                    "ec2:StopInstances",
+                    "autoscaling:DescribeAutoScalingGroups",
+                    "autoscaling:UpdateAutoScalingGroup"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }
+    ```
 4. Open **Roles** panel and click on **Create New Role**
 5. Named it, select **AWS Lambda** in the "AWS Service Roles", then, select the policy you just created and **AWSLambdaBasicExecutionRole**
 
@@ -68,22 +69,24 @@ CronExpression: Expression to scheduled script, UTC time (eg. cron(0 19 * * ? *)
 
  1. Open Lambda service, click on **Create a Lambda function**
  2. Skip "Select blueprint"
- 3. Configure a **CloudWatch Events - Schedule** trigger, and go to the next step ```
-Rule name: Name of your event rule
-Rule description: Describe your rule
-Schedule expression: Your cron expression, UTC time
-Enable triger: better to make it work
-```
-4. **Configure Lambda** parameters ```
-Name: ScheduledStopEc2
-Runtime: Node.js 4.3
-Code entry type:  "Upload a .ZIP file", then upload your zip file
-Handler: src/index.handler
-Role: "Choose an existing role"
-Existing role: select the role previous created
-Memory (MB): 128 should be ok
-Timeout: depends of your infrastrucutre
-VPC: depends of your infrastrucutre
-```
+ 3. Configure a **CloudWatch Events - Schedule** trigger, and go to the next step 
+     ```
+    Rule name: Name of your event rule
+    Rule description: Describe your rule
+    Schedule expression: Your cron expression, UTC time
+    Enable triger: better to make it work
+    ```
+4. **Configure Lambda** parameters
+    ```
+    Name: ScheduledStopEc2
+    Runtime: Node.js 4.3
+    Code entry type:  "Upload a .ZIP file", then upload your zip file
+    Handler: src/index.handler
+    Role: "Choose an existing role"
+    Existing role: select the role previous created
+    Memory (MB): 128 should be ok
+    Timeout: depends of your infrastrucutre
+    VPC: depends of your infrastrucutre
+    ```
 5. **Create function**
 
